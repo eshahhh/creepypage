@@ -1,0 +1,11 @@
+{
+    "name": "creepypage",
+    "version": "0.1.0",
+    "private": true,
+    "description": "A procedurally generated haunted frame page.",
+    "scripts": {
+        "start": "npx live-server --port=8080"
+    },
+    "author": "eshahhh",
+    "license": "MIT"
+}
