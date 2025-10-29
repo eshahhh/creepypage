@@ -8,7 +8,11 @@ let defaultTextFragments = [
     "we are still here"
 ];
 let defaultTitles = [
-    ["The Whispering Hallway", "The Forgotten Room", "The Quiet Shore", "The Hollow Attic", "A Frame of Leaves"]
+    "The Whispering Hallway",
+    "The Forgotten Room",
+    "The Quiet Shore",
+    "The Hollow Attic",
+    "A Frame of Leaves"
 ];
 
 function setup() {
