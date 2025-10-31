@@ -6,105 +6,81 @@
             push();
             noStroke();
 
-            const cx = width * (0.1 + random() * 0.8);
-            const cy = height * (0.2 + random() * 0.6);
-            const r = min(width, height) * 0.18 + random() * min(width, height) * 0.08;
-            const pulse = 0.85 + sin(seed * 0.1) * 0.15;
+            const cx = width * (0.15 + random() * 0.7);
+            const cy = height * (0.25 + random() * 0.5);
+            const r = min(width, height) * 0.15 + random() * min(width, height) * 0.07;
+            const pulse = 0.88 + sin(seed * 0.1) * 0.12;
 
             blendMode(ADD);
 
-            for (let i = 0; i < 10; i++) {
-                const s = 1 + i * 0.4;
-                const a = map(i, 0, 9, 140 * pulse, 5);
-                const redShift = 200 + random() * 55;
-                const greenTint = 20 + i * 3 + random() * 25;
-                fill(redShift, greenTint, 18 + i * 2, a);
-                ellipse(cx, cy, r * s, r * s);
+            for (let layer = 0; layer < 25; layer++) {
+                const t = layer / 25;
+                const layerRadius = r * (2 + t * 6);
+                const alpha = lerp(120, 2, pow(t, 0.75)) * pulse;
+                const redIntensity = lerp(245, 180, t);
+                const greenTint = lerp(40, 80, t);
+                fill(redIntensity, greenTint, 25, alpha);
+                ellipse(cx, cy, layerRadius, layerRadius * 0.9);
             }
 
-            for (let angle = 0; angle < TWO_PI; angle += PI / 8) {
-                const beamLength = r * (1.2 + random() * 0.8);
-                const beamThick = r * 0.2;
+            for (let ring = 0; ring < 4; ring++) {
+                const ringRadius = r * (1.5 + ring * 0.8);
+                const segments = 16 + ring * 8;
 
-                push();
-                translate(cx, cy);
-                rotate(angle + random(-0.2, 0.2));
+                for (let s = 0; s < segments; s++) {
+                    const angle = (s / segments) * TWO_PI + seed * 0.02;
+                    const offsetX = cos(angle) * ringRadius;
+                    const offsetY = sin(angle) * ringRadius * 0.85;
+                    const pSize = r * (0.1 - ring * 0.015);
+                    const pAlpha = (30 - ring * 6) * pulse;
 
-                for (let i = 0; i < 5; i++) {
-                    const alpha = (40 - i * 7) * pulse;
-                    fill(220 + random() * 35, 25 + i * 5, 20, alpha);
-                    ellipse(0, -beamLength * 0.5, beamThick - i * 2, beamLength + i * 12);
+                    fill(240, 50 + ring * 15, 30, pAlpha);
+                    ellipse(cx + offsetX, cy + offsetY, pSize, pSize);
                 }
-                pop();
             }
 
-            for (let wave = 0; wave < 6; wave++) {
-                noFill();
-                stroke(255, 80 + random() * 40, 40, 15 * pulse);
-                strokeWeight(2 + random() * 3);
-
-                const waveRadius = r * (0.5 + wave * 0.3);
-                const segments = 20;
-                beginShape();
-                for (let i = 0; i <= segments; i++) {
-                    const angle = (i / segments) * TWO_PI;
-                    const distortion = sin(angle * 3 + seed * 0.02) * 8;
-                    const x = cx + cos(angle) * (waveRadius + distortion);
-                    const y = cy + sin(angle) * (waveRadius + distortion);
-                    vertex(x, y);
-                }
-                endShape(CLOSE);
-            }
-            noStroke();
-
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 70; i++) {
                 const angle = random(TWO_PI);
-                const dist = random() * r * 2;
+                const dist = sqrt(random()) * r * 3;
                 const px = cx + cos(angle) * dist;
-                const py = cy + sin(angle) * dist;
-                const psize = random() * 4 + 1;
+                const py = cy + sin(angle) * dist * 0.9;
+                const psize = random() * 3.5 + 0.8;
+                const intensity = 1 - (dist / (r * 3));
                 const heat = random();
 
-                if (heat > 0.7) {
-                    fill(255, 180 + random() * 75, 80 + random() * 40, random() * 100 * pulse);
-                } else if (heat > 0.4) {
-                    fill(230, 60 + random() * 50, 30 + random() * 30, random() * 80 * pulse);
+                if (heat > 0.75) {
+                    fill(255, 200 + random() * 55, 100 + random() * 50, random() * 80 * pulse * intensity);
+                } else if (heat > 0.45) {
+                    fill(240, 80 + random() * 60, 40 + random() * 40, random() * 65 * pulse * intensity);
                 } else {
-                    fill(200, 30 + random() * 40, 20, random() * 60 * pulse);
+                    fill(210, 40 + random() * 50, 25, random() * 50 * pulse * intensity);
                 }
 
                 ellipse(px, py, psize, psize);
 
-                fill(255, 100, 50, random() * 30 * pulse);
-                ellipse(px, py, psize * 2.5, psize * 2.5);
+                if (random() > 0.7) {
+                    fill(255, 120, 60, random() * 25 * pulse * intensity);
+                    ellipse(px, py, psize * 2.5, psize * 2.5);
+                }
             }
 
-            for (let i = 0; i < 8; i++) {
-                const angle = (i / 8) * TWO_PI + seed * 0.02;
-                const spiralRadius = r * 0.3 * (1 - i * 0.1);
-                const sx = cx + cos(angle) * spiralRadius;
-                const sy = cy + sin(angle) * spiralRadius;
-
-                fill(255, 150 + random() * 105, 60 + random() * 60, (100 - i * 12) * pulse);
-                ellipse(sx, sy, r * 0.15, r * 0.15);
-            }
-
-            for (let i = 4; i >= 0; i--) {
-                const coreAlpha = map(i, 0, 4, 240, 80) * pulse;
-                fill(255, 140 + i * 20, 80 + i * 15, coreAlpha);
-                ellipse(cx, cy, r * (0.4 - i * 0.06), r * (0.4 - i * 0.06));
+            for (let i = 5; i >= 0; i--) {
+                const coreT = i / 5;
+                const coreAlpha = lerp(220, 70, coreT) * pulse;
+                fill(255, 160 + i * 15, 90 + i * 12, coreAlpha);
+                ellipse(cx, cy, r * (0.5 - coreT * 0.15), r * (0.5 - coreT * 0.15));
             }
 
             noFill();
-            for (let t = 0; t < 8; t++) {
-                stroke(220 + random() * 35, 50 + random() * 50, 30, 40 * pulse);
-                strokeWeight(3 + random() * 4);
+            for (let t = 0; t < 10; t++) {
+                stroke(230 + random() * 25, 60 + random() * 40, 35, 35 * pulse);
+                strokeWeight(2.5 + random() * 3.5);
 
                 beginShape();
                 const startAngle = random(TWO_PI);
-                for (let p = 0; p < 10; p++) {
-                    const dist = r * (0.2 + p * 0.15);
-                    const angle = startAngle + p * 0.3 + sin(p + seed * 0.01) * 0.5;
+                for (let p = 0; p < 12; p++) {
+                    const dist = r * (0.3 + p * 0.12);
+                    const angle = startAngle + p * 0.35 + sin(p + seed * 0.01) * 0.6;
                     const x = cx + cos(angle) * dist;
                     const y = cy + sin(angle) * dist;
                     curveVertex(x, y);
@@ -113,16 +89,24 @@
             }
             noStroke();
 
-            blendMode(BLEND);
-            fill(40, 10, 10, 60);
-            for (let s = 0; s < 5; s++) {
-                const smokeX = cx + random(-20, 20);
-                const smokeY = cy - r * 0.8 - s * 25;
-                const smokeSize = r * (0.3 + s * 0.1);
-                ellipse(smokeX, smokeY, smokeSize, smokeSize * 1.4);
-            }
+            const groundY = height;
+            const groundGradient = (groundY - cy) / height;
+            fill(220, 60, 40, 15 * pulse * groundGradient);
+            ellipse(cx, cy + (groundY - cy) * 0.6, r * 4, r * 1.5);
+
+            fill(200, 50, 30, 10 * pulse * groundGradient);
+            ellipse(cx, groundY - 15, r * 3, r * 0.8);
 
             blendMode(BLEND);
+
+            for (let s = 0; s < 6; s++) {
+                const smokeX = cx + random(-15, 15);
+                const smokeY = cy - r * 0.7 - s * 20;
+                const smokeSize = r * (0.35 + s * 0.08);
+                fill(45, 12, 12, 70 - s * 10);
+                ellipse(smokeX, smokeY, smokeSize, smokeSize * 1.3);
+            }
+
             pop();
         }
     };

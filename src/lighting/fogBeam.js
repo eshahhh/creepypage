@@ -6,91 +6,102 @@
             push();
             noStroke();
 
-            const bx = width * (0.1 + random() * 0.8);
-            const by = height * (0.0 + random() * 0.45);
-            const bw = min(width, height) * 0.24;
+            const bx = width * (0.15 + random() * 0.7);
+            const by = height * (0.05 + random() * 0.35);
+            const bw = min(width, height) * 0.18;
 
             blendMode(ADD);
 
-            for (let beam = 0; beam < 3; beam++) {
-                const beamOffset = (beam - 1) * bw * 0.3;
-                const beamIntensity = 1 - beam * 0.25;
+            for (let layer = 0; layer < 25; layer++) {
+                const t = layer / 25;
+                const yPos = by + t * (height - by);
+                const spread = lerp(bw * 0.6, bw * 2.5, t);
+                const turbulence = noise(t * 5 + seed * 0.001) * spread * 0.2;
+                const alpha = lerp(60, 2, pow(t, 0.7));
 
-                for (let i = 0; i < 18; i++) {
-                    const t = i / 18;
-                    const alpha = map(i, 0, 17, 100 * beamIntensity, 4);
-                    const turbulence = noise(i * 0.2 + seed * 0.001) * 20;
-
-                    fill(240, 245, 255, alpha * (0.6 + random() * 0.5));
-
-                    beginShape();
-                    vertex(bx + beamOffset - bw * t + turbulence, by + i * 28);
-                    vertex(bx + beamOffset + bw * t - turbulence, by + i * 28);
-                    vertex(width * (0.5 + beam * 0.1), height);
-                    vertex(width * (0.5 - beam * 0.1), height);
-                    endShape(CLOSE);
-                }
-            }
-
-            for (let i = 8; i >= 0; i--) {
-                fill(250, 252, 255, 60 - i * 6);
-                ellipse(bx, by, bw * (1.5 - i * 0.15), bw * (0.8 - i * 0.08));
-            }
-
-            for (let i = 0; i < 60; i++) {
-                const t = random();
-                const px = bx + random(-bw * t * 1.5, bw * t * 1.5);
-                const py = by + random(0, height - by);
-                const psize = random() * 4 + 1;
-                const brightness = 240 + random() * 15;
-
-                const beamWidth = bw * (py - by) / (height - by) * 1.5;
-                if (abs(px - bx) < beamWidth) {
-                    fill(brightness, brightness + 5, 255, random() * 100 + 50);
-                    ellipse(px, py, psize, psize);
-
-                    fill(brightness, brightness + 5, 255, random() * 30);
-                    ellipse(px, py, psize * 3, psize * 3);
-                }
-            }
-
-            for (let i = 0; i < 25; i++) {
-                const t = random();
-                const edgeSide = random() > 0.5 ? 1 : -1;
-                const edgeX = bx + edgeSide * bw * t * (1 + random() * 0.3);
-                const edgeY = by + random() * (height - by);
-
-                fill(245, 248, 255, random() * 40 + 10);
-                ellipse(edgeX, edgeY, random() * 8 + 3, random() * 20 + 10);
-            }
-
-            noFill();
-            stroke(230, 235, 245, 20);
-            for (let w = 0; w < 8; w++) {
-                strokeWeight(4 + random() * 6);
+                fill(245, 248, 255, alpha * (0.7 + random() * 0.3));
 
                 beginShape();
-                const wispStart = random() * width;
-                const wispY = by + random() * (height - by) * 0.7;
+                vertex(bx - spread * 0.5 + turbulence, yPos);
+                vertex(bx + spread * 0.5 - turbulence, yPos);
+                vertex(bx + spread * 0.6, yPos + 30);
+                vertex(bx - spread * 0.6, yPos + 30);
+                endShape(CLOSE);
+            }
 
-                for (let p = 0; p < 6; p++) {
-                    const x = wispStart + p * 30 + random(-20, 20);
-                    const y = wispY + sin(p * 0.5) * 25 + random(-15, 15);
+            for (let i = 12; i >= 0; i--) {
+                const t = i / 12;
+                const alpha = lerp(100, 3, t);
+                fill(250, 252, 255, alpha);
+                ellipse(bx, by, bw * (1.8 - t * 0.3), bw * (1.2 - t * 0.2));
+            }
+
+            for (let ring = 0; ring < 4; ring++) {
+                const ringDist = bw * (0.8 + ring * 0.5);
+                const segments = 12 + ring * 6;
+
+                for (let s = 0; s < segments; s++) {
+                    const angle = (s / segments) * TWO_PI;
+                    const offsetX = cos(angle) * ringDist;
+                    const offsetY = sin(angle) * ringDist * 0.7;
+                    const pAlpha = 35 - ring * 8;
+
+                    fill(245, 250, 255, pAlpha);
+                    ellipse(bx + offsetX, by + offsetY, bw * 0.08, bw * 0.08);
+                }
+            }
+
+            for (let i = 0; i < 80; i++) {
+                const t = pow(random(), 0.8);
+                const yPos = by + t * (height - by);
+                const beamWidth = lerp(bw * 0.6, bw * 2.5, t);
+                const px = bx + (random() - 0.5) * beamWidth;
+                const psize = random() * 3 + 1;
+                const brightness = 245 + random() * 10;
+                const intensity = 1 - t;
+
+                fill(brightness, brightness + 3, 255, random() * 120 * intensity + 30);
+                ellipse(px, yPos, psize, psize);
+
+                if (random() > 0.7) {
+                    fill(brightness, brightness + 3, 255, random() * 40 * intensity);
+                    ellipse(px, yPos, psize * 3, psize * 3);
+                }
+            }
+
+            for (let w = 0; w < 12; w++) {
+                const wStart = pow(random(), 0.6);
+                const wispY = by + wStart * (height - by);
+                const wispX = bx + (random() - 0.5) * bw * 2;
+
+                noFill();
+                stroke(235, 240, 250, 25 - w * 1.5);
+                strokeWeight(3 + random() * 4);
+
+                beginShape();
+                for (let p = 0; p < 8; p++) {
+                    const x = wispX + p * 20 + random(-15, 15);
+                    const y = wispY + p * 15 + sin(p * 0.6) * 20;
                     curveVertex(x, y);
                 }
                 endShape();
             }
             noStroke();
 
-            for (let c = 0; c < 12; c++) {
-                const cx = bx + random(-bw, bw);
-                const cy = by + random(0, height - by);
-                const csize = 20 + random() * 40;
+            for (let c = 0; c < 18; c++) {
+                const cy = by + pow(random(), 0.7) * (height - by);
+                const cloudSpread = lerp(bw * 0.6, bw * 2.5, (cy - by) / (height - by));
+                const cx = bx + (random() - 0.5) * cloudSpread * 0.9;
+                const csize = 25 + random() * 50;
 
-                fill(240, 245, 255, random() * 15 + 5);
+                fill(240, 245, 255, random() * 18 + 6);
                 ellipse(cx, cy, csize, csize * 0.6);
-                ellipse(cx + csize * 0.3, cy + csize * 0.2, csize * 0.7, csize * 0.4);
+                ellipse(cx + csize * 0.3, cy + csize * 0.15, csize * 0.7, csize * 0.5);
+                ellipse(cx - csize * 0.2, cy - csize * 0.1, csize * 0.6, csize * 0.45);
             }
+
+            fill(248, 250, 255, 8);
+            ellipse(bx, by + (height - by) * 0.7, bw * 4, bw * 2);
 
             blendMode(BLEND);
             pop();
