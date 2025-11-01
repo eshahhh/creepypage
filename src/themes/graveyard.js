@@ -22,9 +22,32 @@
 
             for (let y = 0; y < height; y++) {
                 const t = map(y, 0, height, 0, 1);
-                const c = lerpColor(color(8, 8, 15), color(20, 15, 35), t);
-                stroke(c); line(0, y, width, y);
+                const t2 = pow(t, 1.5);
+                const baseColor = lerpColor(color(5, 5, 12), color(18, 12, 32), t2);
+                const variance = noise(y * 0.01, seed * 0.001) * 8 - 4;
+                const c = color(
+                    red(baseColor) + variance,
+                    green(baseColor) + variance,
+                    blue(baseColor) + variance
+                );
+                stroke(c);
+                line(0, y, width, y);
             }
+
+            push();
+            noStroke();
+            for (let i = 0; i < 8; i++) {
+                const cloudX = random(width);
+                const cloudY = random(height * 0.3);
+                const cloudSize = random(100, 300);
+                fill(15, 15, 25, random(10, 30));
+                for (let j = 0; j < 5; j++) {
+                    const offsetX = random(-cloudSize * 0.3, cloudSize * 0.3);
+                    const offsetY = random(-cloudSize * 0.15, cloudSize * 0.15);
+                    ellipse(cloudX + offsetX, cloudY + offsetY, cloudSize * random(0.5, 1), cloudSize * 0.4);
+                }
+            }
+            pop();
 
             push();
             noStroke();
@@ -125,7 +148,6 @@
             pop();
 
             push();
-            fill(6, 6, 8, 255);
             const stoneCount = 8 + floor(random() * 6);
             for (let i = 0; i < stoneCount; i++) {
                 const w = 30 + random() * 80;
@@ -133,13 +155,19 @@
                 const x = random() * width;
                 const y = height - (10 + random() * 80);
                 const tilt = random(-0.1, 0.1);
+                const depth = random();
 
                 push();
                 translate(x, y);
                 rotate(tilt);
 
+                fill(6, 6, 8, 255);
                 rect(-w / 2, -h, w, h, 4);
 
+                fill(3, 3, 5, 200);
+                rect(-w / 2 + 2, -h + 4, w - 4, h - 4, 3);
+
+                fill(6, 6, 8, 255);
                 if (random() > 0.5) {
                     arc(0, -h, w, w * 0.6, PI, 0, CHORD);
                 } else {
@@ -152,7 +180,25 @@
                 for (let c = 0; c < 2; c++) {
                     line(-w / 4 + random() * w / 2, -h * 0.8, -w / 4 + random() * w / 2, -h * 0.3);
                 }
+
+                if (random() > 0.7) {
+                    stroke(15, 15, 20, 60);
+                    strokeWeight(0.5);
+                    for (let v = 0; v < 3; v++) {
+                        line(-w / 2 + random() * w, -h + random() * h * 0.7,
+                            -w / 2 + random() * w, -h + random() * h * 0.7 + 20);
+                    }
+                }
                 noStroke();
+
+                if (random() > 0.6) {
+                    fill(180, 200, 180, random(40, 80));
+                    for (let m = 0; m < 3; m++) {
+                        const mx = -w / 2 + random() * w;
+                        const my = -h * random(0.4, 0.8);
+                        ellipse(mx, my, random(5, 15), random(3, 8));
+                    }
+                }
 
                 pop();
             }
