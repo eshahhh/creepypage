@@ -1,19 +1,4 @@
 let sceneSeed = 0;
-let defaultTextFragments = [
-    "it moved again",
-    "this wasn't here before",
-    "the note rewrote itself",
-    "listen closer",
-    "do not open the door",
-    "we are still here"
-];
-let defaultTitles = [
-    "The Whispering Hallway",
-    "The Forgotten Room",
-    "The Quiet Shore",
-    "The Hollow Attic",
-    "A Frame of Leaves"
-];
 
 function setup() {
     const mainCanvas = createCanvas(windowWidth, windowHeight);
@@ -37,9 +22,6 @@ function generateScene(seed = Math.floor(Math.random() * 1000000)) {
     if (window.Themes) {
         selectedThemeComponent = window.Themes.applyRandom(sceneSeed);
     }
-
-    window.currentFragments = selectedThemeComponent ? selectedThemeComponent.fragments : defaultTextFragments;
-    window.currentTitles = selectedThemeComponent ? selectedThemeComponent.titles : defaultTitles;
 
     let selectedAtmosphereComponent = null;
     if (window.Atmosphere) {
@@ -88,76 +70,84 @@ function generateScene(seed = Math.floor(Math.random() * 1000000)) {
         console.log(`Scene seed: ${sceneSeed} (error parsing meta)`);
     }
 
-    renderTextFragments();
+    renderProceduralTitle();
 }
 
-function renderBackground() {
-    for (let y = 0; y < height; y++) {
-        const lerpFactor = map(y, 0, height, 0, 1);
-        const interpolatedColor = lerpColor(color(18, 18, 25), color(30, 22, 50), lerpFactor);
-        stroke(interpolatedColor);
-        line(0, y, width, y);
-    }
-    push();
-    noStroke();
-    fill(240, 240, 220, 200);
-    const highlightX = width * (0.2 + random() * 0.6);
-    const highlightY = height * (0.12 + random() * 0.25);
-    ellipse(highlightX, highlightY, 80 + random() * 60, 80 + random() * 60);
-    pop();
-}
+function generateProceduralTitle(themeName, lightingName, atmosphereNames, objectNames) {
+    const timeDescriptors = ['Midnight', 'Twilight', 'Dusk', 'Dawn', 'Evening', 'Witching Hour'];
+    const moodDescriptors = ['Haunted', 'Forsaken', 'Forgotten', 'Silent', 'Eerie', 'Desolate', 'Cursed', 'Abandoned'];
+    const locationPrefixes = ['The', 'A', 'An'];
 
-function selectTitle() {
-    return random(window.currentTitles);
-}
+    let title = '';
 
-function renderMidgroundLayer() {
-    noStroke();
-    fill(15, 15, 30, 200);
-    beginShape();
-    vertex(0, height);
-    for (let i = 0; i < 8; i++) {
-        const vertexX = (i + 1) * width / 8;
-        const vertexHeight = height * 0.55 + noise(i * 0.4 + sceneSeed * 0.0001) * height * 0.18;
-        vertex(vertexX, vertexHeight);
-    }
-    vertex(width, height);
-    endShape(CLOSE);
-}
-
-function renderForegroundLayer() {
-    fill(6, 6, 8, 255);
-    const columnCount = 6;
-    for (let i = 0; i < columnCount; i++) {
-        const columnWidth = 40 + random() * 120;
-        const columnHeight = 80 + random() * 220;
-        const columnX = random() * width;
-        const columnY = height - (20 + random() * 120);
-        rect(columnX, columnY - columnHeight, columnWidth, columnHeight, 6);
-    }
-}
-
-function renderTextFragments() {
-    textAlign(CENTER);
-    for (let i = 0; i < 3; i++) {
-        const textFragment = random(window.currentFragments);
-        const textX = width * (0.2 + random() * 0.6);
-        const textY = height * (0.2 + random() * 0.6);
-        push();
-        translate(textX, textY);
-        rotate(random(-0.08, 0.08));
-        fill(220, 220, 230, 200);
-        textSize(18 + random() * 10);
-        text(textFragment, 0, 0);
-        pop();
+    if (lightingName === 'fullMoon' || lightingName === 'moonbeam') {
+        title = random(['Moonlit', 'Lunar', 'Silver']) + ' ';
+    } else if (lightingName === 'candlelight' || lightingName === 'lantern') {
+        title = random(['Candlelit', 'Flickering', 'Dimly Lit']) + ' ';
+    } else if (lightingName === 'redGlow') {
+        title = random(['Crimson', 'Blood-Red', 'Scarlet']) + ' ';
+    } else if (lightingName === 'stormLight') {
+        title = random(['Storm-Swept', 'Tempestuous', 'Lightning-Struck']) + ' ';
+    } else if (lightingName === 'fireflies') {
+        title = random(['Glimmering', 'Luminous', 'Phosphorescent']) + ' ';
+    } else if (lightingName === 'auroraGlow') {
+        title = random(['Ethereal', 'Spectral', 'Otherworldly']) + ' ';
+    } else {
+        title = random(moodDescriptors) + ' ';
     }
 
-    const chosenTitle = selectTitle();
+    if (themeName === 'graveyard') {
+        title += random(['Cemetery', 'Graveyard', 'Burial Ground', 'Necropolis']);
+    } else if (themeName === 'forest') {
+        title += random(['Woods', 'Forest', 'Grove', 'Thicket']);
+    } else if (themeName === 'attic') {
+        title += random(['Attic', 'Loft', 'Upper Chamber']);
+    } else if (themeName === 'alleyway') {
+        title += random(['Alley', 'Passage', 'Corridor', 'Lane']);
+    } else if (themeName === 'mirrorRoom') {
+        title += random(['Hall of Mirrors', 'Mirror Chamber', 'Reflection Room']);
+    } else if (themeName === 'shoreline') {
+        title += random(['Shore', 'Beach', 'Coastline', 'Waterfront']);
+    } else {
+        title += random(['Place', 'Realm', 'Domain', 'Sanctum']);
+    }
+
+    if (atmosphereNames && atmosphereNames.length > 0) {
+        const atmo = atmosphereNames[0];
+        if (atmo === 'rain' || atmo === 'dripping') {
+            title = random(timeDescriptors) + ' Rain at the ' + title;
+        } else if (atmo === 'snow') {
+            title = 'Snow-Covered ' + title;
+        } else if (atmo === 'foggy') {
+            title = 'Fog-Shrouded ' + title;
+        } else if (atmo === 'whispers' || atmo === 'echoing') {
+            title = 'Whispering ' + title;
+        } else if (atmo === 'shadows' || atmo === 'shifting') {
+            title = 'Shadow-Draped ' + title;
+        }
+    }
+
+    return title;
+}
+
+function renderProceduralTitle() {
+    const meta = window.__lastSceneMeta || {};
+    const title = generateProceduralTitle(
+        meta.theme,
+        meta.lighting,
+        meta.atmosphereComponents,
+        meta.objects
+    );
+
     push();
     textAlign(LEFT);
     fill(200, 200, 230, 230);
     textSize(24);
-    text(chosenTitle, 18, 36);
+    text(title, 18, 36);
+
+    textSize(12);
+    fill(180, 180, 210, 180);
+    text('Click anywhere to regenerate', 18, height - 18);
     pop();
 }
 
