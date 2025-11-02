@@ -58,13 +58,25 @@ function generateScene(seed = Math.floor(Math.random() * 1000000)) {
             atmosphere: atmosphereComponentName || null,
             lighting: lightingComponentName || null,
             objects: objectsComponentName || null,
-            atmosphereComponents: selectedAtmosphereComponent && selectedAtmosphereComponent.names ? selectedAtmosphereComponent.names : []
+            atmosphereComponents: selectedAtmosphereComponent && selectedAtmosphereComponent.names ? selectedAtmosphereComponent.names : [],
+            themeNames: selectedThemeComponent && selectedThemeComponent.names ? selectedThemeComponent.names : [],
+            lightingNames: selectedLightingComponent && selectedLightingComponent.names ? selectedLightingComponent.names : [],
+            objectNames: selectedObjectsComponent && selectedObjectsComponent.names ? selectedObjectsComponent.names : []
         };
         console.log(`Scene seed: ${sceneSeed}`);
         console.log(`Theme: ${themeComponentName || 'none'}`);
         console.log(`Atmosphere: ${atmosphereComponentName || 'none'}`);
         console.log(`Lighting: ${lightingComponentName || 'none'}`);
         console.log(`Objects: ${objectsComponentName || 'none'}`);
+
+        if (window.Sounds) {
+            const themeName = selectedThemeComponent ? selectedThemeComponent.name : null;
+            const atmosphereNames = selectedAtmosphereComponent ? selectedAtmosphereComponent.names : [];
+            const lightingName = selectedLightingComponent ? selectedLightingComponent.name : null;
+            const objectNames = selectedObjectsComponent ? selectedObjectsComponent.names : [];
+
+            window.Sounds.play(themeName, atmosphereNames, lightingName, objectNames);
+        }
     } catch (e) {
         window.__lastSceneMeta = { seed: sceneSeed };
         console.log(`Scene seed: ${sceneSeed} (error parsing meta)`);
@@ -157,6 +169,16 @@ window.regenerateSceneWithSeed = (seed) => {
 };
 
 function mouseClicked() {
-    generateScene();
-    redraw();
+    if (window.Sounds && !window.Sounds.canChangeScene()) {
+        return;
+    }
+
+    if (window.Sounds) {
+        window.Sounds.fadeOut(500);
+    }
+
+    setTimeout(() => {
+        generateScene();
+        redraw();
+    }, 100);
 }
